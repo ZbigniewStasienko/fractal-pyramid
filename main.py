@@ -1,5 +1,5 @@
 #Learning PyOpenGl
-#Creating sample cube
+#Adding surfaces
 
 import pygame
 from pygame.locals import *
@@ -16,7 +16,7 @@ vertices = (
     (1, -1, 1),
     (1, 1, 1),
     (-1, -1, 1),
-    (-1, 1, 1),
+    (-1, 1, 1)
 )
 
 #definig edges
@@ -32,11 +32,41 @@ edges = (
     (6,7),
     (5,1),
     (5,4),
-    (5,7),
+    (5,7)
+)
+
+#definig surfaces
+surfaces = (
+    (0, 1, 2, 3),
+    (3, 2, 7, 6),
+    (6, 7, 5, 4),
+    (4, 5, 1, 0),
+    (1, 5, 7, 2),
+    (4, 0, 3, 6)
+)
+
+colors = (
+    (0, 1, 0),
+    (0, 1, 1),
+    (1, 0, 0),
+    (1, 0, 1),
+    (1, 1, 0),
+    (1, 1, 1)
 )
 
 #definig Cube object
 def Cube():
+
+    glBegin(GL_QUADS)
+    x = 0
+    for surface in surfaces:
+        glColor3fv(colors[x])
+        x += 1
+        for vertex in surface:
+            glVertex3fv(vertices[vertex])
+    glEnd()
+
+
     glBegin(GL_LINES)
     for edge in edges:
         for vertex in edge:
@@ -51,8 +81,6 @@ def main():
     gluPerspective(45, (display[0]/display[1]), 0.1, 50.0)
 
     glTranslatef(0.0, 0.0, -5)
-
-    glRotatef(0, 0, 0, 0)
 
     while True:
         for event in pygame.event.get():

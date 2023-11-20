@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from math import sqrt
+from math import *
 
 def draw_triangle(v1, v2, v3):
     glBegin(GL_TRIANGLES)
@@ -35,8 +35,8 @@ def sierpinski(v1, v2, v3, v4, level):
     sierpinski(mid4, mid5, mid6, v4, level - 1)
 
 def main():
-    #level = int(input("Podaj poziom piramidy (zalecane max 5): "))
-    level = 3
+    level = int(input("Podaj poziom piramidy (zalecane max 5): "))
+
     if level < 0:
         return
 
@@ -46,6 +46,7 @@ def main():
     gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
     glTranslatef(0.0, -1.0, -5)
     surface_condition = 0
+    angle = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -64,19 +65,21 @@ def main():
                 if event.key == pygame.K_DOWN:
                     glTranslatef(0, 0.5, 0)
 
-                if event.key == pygame.K_LEFT:
-                    glTranslatef(0.5, 0, 0)
-
-                if event.key == pygame.K_RIGHT:
-                    glTranslatef(-0.5, 0, 0)
-
                 if event.key == pygame.K_o:
-                    glTranslatef(0, 0, -0.5)
+                    glTranslatef(sin(radians(angle)), 0, -cos(radians(angle)))
 
                 if event.key == pygame.K_i:
-                    glTranslatef(0, 0, 0.5)
+                    glTranslatef(-sin(radians(angle)), 0, cos(radians(angle)))
+
+                if event.key == pygame.K_LEFT:
+                    glTranslatef(cos(radians(angle)), 0, sin(radians(angle)))
+
+                if event.key == pygame.K_RIGHT:
+                    glTranslatef(-cos(radians(angle)), 0, -sin(radians(angle)))
 
         glRotatef(0.5, 0, 1, 0)
+        angle += 0.5
+        angle = angle % 360
 
         if surface_condition == 1:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)

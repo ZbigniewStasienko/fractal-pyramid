@@ -35,8 +35,8 @@ def sierpinski(v1, v2, v3, v4, level):
     sierpinski(mid4, mid5, mid6, v4, level - 1)
 
 def main():
-    level = int(input("Podaj poziom piramidy (zalecane max 5): "))
-
+    #level = int(input("Podaj poziom piramidy (zalecane max 5): "))
+    level = 3
     if level < 0:
         return
 
@@ -45,14 +45,44 @@ def main():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
     glTranslatef(0.0, -1.0, -5)
-
+    surface_condition = 0
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    if surface_condition == 0:
+                        surface_condition = 1
+                    else:
+                        surface_condition = 0
+
+                if event.key == pygame.K_UP:
+                    glTranslatef(0, -0.5, 0)
+
+                if event.key == pygame.K_DOWN:
+                    glTranslatef(0, 0.5, 0)
+
+                if event.key == pygame.K_LEFT:
+                    glTranslatef(0.5, 0, 0)
+
+                if event.key == pygame.K_RIGHT:
+                    glTranslatef(-0.5, 0, 0)
+
+                if event.key == pygame.K_o:
+                    glTranslatef(0, 0, -0.5)
+
+                if event.key == pygame.K_i:
+                    glTranslatef(0, 0, 0.5)
 
         glRotatef(0.5, 0, 1, 0)
+
+        if surface_condition == 1:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        else:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         sierpinski((-1, 0, sqrt(3)/3), (1, 0, sqrt(3)/3), (0, 0, -sqrt(3)*2/3), (0, sqrt(15)/3, 0), level)
         pygame.display.flip()

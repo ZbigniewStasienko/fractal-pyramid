@@ -3,23 +3,36 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from math import *
+from PIL import Image
 
-def draw_triangle(v1, v2, v3):
+
+name_of_file = 'camo.JPG'
+
+
+def draw_triangle(v1, v2, v3, texture_id):
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
     glBegin(GL_TRIANGLES)
+    glTexCoord2f(0.0, 0.0)
     glVertex3fv(v1)
+    glTexCoord2f(1.0, 0.0)
     glVertex3fv(v2)
+    glTexCoord2f(0.0, 1.0)
     glVertex3fv(v3)
     glEnd()
+    glDisable(GL_TEXTURE_2D)
+
 
 def midpoint(p1, p2):
-    return ((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2)
+    return (p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2
 
-def sierpinski(v1, v2, v3, v4, level):
+
+def sierpinski(v1, v2, v3, v4, level, texture):
     if level == 0:
-        draw_triangle(v1, v2, v3)
-        draw_triangle(v1, v2, v4)
-        draw_triangle(v1, v3, v4)
-        draw_triangle(v2, v3, v4)
+        draw_triangle(v1, v2, v3, texture)
+        draw_triangle(v1, v2, v4, texture)
+        draw_triangle(v1, v3, v4, texture)
+        draw_triangle(v2, v3, v4, texture)
         return
 
     mid1 = midpoint(v1, v2)
@@ -29,10 +42,29 @@ def sierpinski(v1, v2, v3, v4, level):
     mid5 = midpoint(v2, v4)
     mid6 = midpoint(v3, v4)
 
-    sierpinski(v1, mid1, mid3, mid4, level - 1)
-    sierpinski(mid1, v2, mid2, mid5, level - 1)
-    sierpinski(mid3, mid2, v3, mid6, level - 1)
-    sierpinski(mid4, mid5, mid6, v4, level - 1)
+    sierpinski(v1, mid1, mid3, mid4, level - 1, texture)
+    sierpinski(mid1, v2, mid2, mid5, level - 1, texture)
+    sierpinski(mid3, mid2, v3, mid6, level - 1, texture)
+    sierpinski(mid4, mid5, mid6, v4, level - 1, texture)
+
+
+def load_texture(file):
+    try:
+        image = Image.open(file)
+    except Exception as e:
+        print(f"Blad podczas otwierania pliku z tekstura: {e}")
+        return None
+
+    image_data = image.tobytes("raw", "RGB", 0, -1)
+    width, height = image.size
+    text_id = glGenTextures(1)
+
+    glBindTexture(GL_TEXTURE_2D, text_id)
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data)
+    glGenerateMipmap(GL_TEXTURE_2D)
+    return text_id
+
 
 def main():
     level = int(input("Podaj poziom piramidy (zalecane max 5): "))
@@ -41,10 +73,20 @@ def main():
         return
 
     pygame.init()
-    display = (800, 600)
+    display = (1200, 800)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+
+    glMatrixMode(GL_PROJECTION)
     gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+
+    glMatrixMode(GL_MODELVIEW)
     glTranslatef(0.0, -1.0, -5)
+
+    texture_id = load_texture(name_of_file)
+
+    glEnable(GL_COLOR_MATERIAL)
+    glEnable(GL_DEPTH_TEST)
+
     surface_condition = 0
     angle = 0
     while True:
@@ -60,10 +102,10 @@ def main():
                         surface_condition = 0
 
                 if event.key == pygame.K_UP:
-                    glTranslatef(0, -0.5, 0)
+                    glTranslatef(0, -1, 0)
 
                 if event.key == pygame.K_DOWN:
-                    glTranslatef(0, 0.5, 0)
+                    glTranslatef(0, 1, 0)
 
                 if event.key == pygame.K_o:
                     glTranslatef(sin(radians(angle)), 0, -cos(radians(angle)))
@@ -87,8 +129,9 @@ def main():
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        sierpinski((-1, 0, sqrt(3)/3), (1, 0, sqrt(3)/3), (0, 0, -sqrt(3)*2/3), (0, sqrt(15)/3, 0), level)
+        sierpinski((-1, 0, sqrt(3)/3), (1, 0, sqrt(3)/3), (0, 0, -sqrt(3)*2/3), (0, sqrt(15)/3, 0), level, texture_id)
         pygame.display.flip()
         pygame.time.wait(10)
+
 
 main()

@@ -7,6 +7,7 @@ from PIL import Image
 
 
 name_of_file = 'camo.JPG'
+name_of_floor = 'floor.JPG'
 
 
 def draw_triangle(v1, v2, v3, txt_id):
@@ -48,6 +49,38 @@ def sierpinski(v1, v2, v3, v4, level, texture):
     sierpinski(mid4, mid5, mid6, v4, level - 1, texture)
 
 
+def floor(angle, texture):
+    glPushAttrib(GL_CURRENT_BIT)
+    glColor3f(0.7, 0.7, 0.7)
+    glPushMatrix()
+    glRotatef(angle, 0.0, 1.0, 0.0)
+
+    square_vertices = [
+        (40.0, 0.0, 40.0),
+        (-40.0, 0.0, 40.0),
+        (-40.0, 0.0, -40.0),
+        (40.0, 0.0, -40.0)
+    ]
+    texture_values = [
+        (1.0, 1.0),
+        (-1.0, 1.0),
+        (-1.0, -1.0),
+        (1.0, -1.0)
+    ]
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, texture)
+    glBegin(GL_QUADS)
+    i = 0
+    for vertex in square_vertices:
+        glTexCoord2f(texture_values[i][0], texture_values[i][1])
+        glVertex3fv(vertex)
+        i += 1
+    glEnd()
+    glDisable(GL_TEXTURE_2D)
+    glPopMatrix()
+    glPopAttrib()
+
+
 def load_texture(file):
     try:
         image = Image.open(file)
@@ -69,11 +102,11 @@ def load_texture(file):
 def main():
     level = int(input("Podaj poziom piramidy (zalecane max 5): "))
 
-    if level < 0:
+    if level < 0 or level > 6:
         return
 
     pygame.init()
-    display = (1200, 800)
+    display = (1200, 700)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
 
     glMatrixMode(GL_PROJECTION)
@@ -83,6 +116,7 @@ def main():
     glTranslatef(0.0, -1.0, -5)
 
     texture_id = load_texture(name_of_file)
+    texture_id2 = load_texture(name_of_floor)
 
     glEnable(GL_COLOR_MATERIAL)
     glEnable(GL_DEPTH_TEST)
@@ -135,13 +169,16 @@ def main():
         angle += 0.5
         angle = angle % 360
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
         if surface_condition == 1:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        else:
+            sierpinski((-1, 0, sqrt(3) / 3), (1, 0, sqrt(3) / 3), (0, 0, -sqrt(3) * 2 / 3), (0, sqrt(15) / 3, 0), level, texture_id)
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        else:
+            sierpinski((-1, 0, sqrt(3) / 3), (1, 0, sqrt(3) / 3), (0, 0, -sqrt(3) * 2 / 3), (0, sqrt(15) / 3, 0), level, texture_id)
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        sierpinski((-1, 0, sqrt(3)/3), (1, 0, sqrt(3)/3), (0, 0, -sqrt(3)*2/3), (0, sqrt(15)/3, 0), level, texture_id)
+        floor(-angle, texture_id2)
         pygame.display.flip()
         pygame.time.wait(10)
 

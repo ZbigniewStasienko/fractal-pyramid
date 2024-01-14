@@ -9,9 +9,9 @@ from PIL import Image
 name_of_file = 'camo.JPG'
 
 
-def draw_triangle(v1, v2, v3, texture_id):
+def draw_triangle(v1, v2, v3, txt_id):
     glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glBindTexture(GL_TEXTURE_2D, txt_id)
     glBegin(GL_TRIANGLES)
     glTexCoord2f(0.0, 0.0)
     glVertex3fv(v1)
@@ -51,8 +51,8 @@ def sierpinski(v1, v2, v3, v4, level, texture):
 def load_texture(file):
     try:
         image = Image.open(file)
-    except Exception as e:
-        print(f"Blad podczas otwierania pliku z tekstura: {e}")
+    except Exception as exeption:
+        print(f"Blad podczas otwierania pliku z tekstura: {exeption}")
         return None
 
     image_data = image.tobytes("raw", "RGB", 0, -1)
@@ -94,6 +94,10 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
+                glTranslatef(sin(radians(angle)), 0, -cos(radians(angle)))
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
+                glTranslatef(-sin(radians(angle)), 0, cos(radians(angle)))
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
                     if surface_condition == 0:
@@ -118,6 +122,14 @@ def main():
 
                 if event.key == pygame.K_RIGHT:
                     glTranslatef(-cos(radians(angle)), 0, -sin(radians(angle)))
+
+                if event.key == pygame.K_m:
+                    if level < 5:
+                        level += 1
+
+                if event.key == pygame.K_l:
+                    if level > 0:
+                        level -= 1
 
         glRotatef(0.5, 0, 1, 0)
         angle += 0.5

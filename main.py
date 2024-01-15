@@ -1,13 +1,17 @@
+from tkinter import messagebox
+
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from math import *
 from PIL import Image
+import tkinter as tk
 
 
 name_of_file = 'camo.JPG'
 name_of_floor = 'floor.JPG'
+instruction = "Strzalki: ruch kamery \nI: zoom in \nO:   zoom out \nScroll myszki: zoom in/zoom out \nS: wylaczenie/wlaczenie tekstury \nM: zwiekszenie poziomu rekurencji \nL: zmniejszenie poziomu rekurencji"
 
 
 def draw_triangle(v1, v2, v3, txt_id):
@@ -51,7 +55,6 @@ def sierpinski(v1, v2, v3, v4, level, texture):
 
 def floor(angle, texture):
     glPushAttrib(GL_CURRENT_BIT)
-    glColor3f(0.7, 0.7, 0.7)
     glPushMatrix()
     glRotatef(angle, 0.0, 1.0, 0.0)
 
@@ -99,7 +102,15 @@ def load_texture(file):
     return text_id
 
 
+def display_popup(message):
+    root = tk.Tk()
+    root.withdraw()
+    messagebox.showinfo("Instrukacja obslugi", message)
+    root.destroy()
+
+
 def main():
+    print("!!!ABY WYSWIETLIC INSTRUKCJE OBSLUGI WCISNIJ P PODCZAS DZIALANIA PROGRAMU!!!")
     level = int(input("Podaj poziom piramidy (zalecane max 5): "))
 
     if level < 0 or level > 6:
@@ -164,6 +175,9 @@ def main():
                 if event.key == pygame.K_l:
                     if level > 0:
                         level -= 1
+
+                if event.key == pygame.K_p:
+                    display_popup(instruction)
 
         glRotatef(0.5, 0, 1, 0)
         angle += 0.5

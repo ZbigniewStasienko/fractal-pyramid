@@ -117,7 +117,7 @@ def display_popup(message):
 
 
 def main():
-    print("!!!ABY WYSWIETLIC INSTRUKCJE OBSLUGI WCISNIJ P PODCZAS DZIALANIA PROGRAMU!!!")
+    print("\n\n!!!ABY WYSWIETLIC INSTRUKCJE OBSLUGI WCISNIJ P PODCZAS DZIALANIA PROGRAMU!!!")
     level = int(input("Podaj poziom piramidy (liczba od 0 do 6): "))
 
     if level < 0 or level > 6:

@@ -11,10 +11,10 @@ import tkinter as tk
 
 name_of_file = 'camo.JPG'
 name_of_floor = 'floor.JPG'
-instruction = "Strzalki: ruch kamery \nI: zoom in \nO:   zoom out \nScroll myszki: zoom in/zoom out \nS: wylaczenie/wlaczenie tekstury \nM: zwiekszenie poziomu rekurencji \nL: zmniejszenie poziomu rekurencji"
+instruction = ("Arrow keys: camera movements \nI: zoom in \nO: zoom out \nScroll mouse: zoom in/out \nS: "
+               "disable/enable texture \nM: increase recursion level \nL: decrease recursion level")
 
-#Funkcja rysujaca trojkat w 3d na podstawie podanych wierzchołków
-#oraz rozpinająca teksturę na ścianach
+
 def draw_triangle(v1, v2, v3, txt_id):
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, txt_id)
@@ -29,13 +29,10 @@ def draw_triangle(v1, v2, v3, txt_id):
     glDisable(GL_TEXTURE_2D)
 
 
-#Funkcja wyznaczająca wspołrzędne (x,y,z) śrdoka pomiędzy dwoma punktami
-#Niezbędna do generowania piramidy
 def midpoint(p1, p2):
     return (p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2
 
 
-#Funckja rekurencyjne rysująca piramidę w 3d na podstawie aktualnego poziomu piramidy
 def sierpinski(v1, v2, v3, v4, level, texture):
     if level == 0:
         draw_triangle(v1, v2, v3, texture)
@@ -57,7 +54,6 @@ def sierpinski(v1, v2, v3, v4, level, texture):
     sierpinski(mid4, mid5, mid6, v4, level - 1, texture)
 
 
-#Funkcja dodająca podłoże do projektu wczytując odpowiednią teksturę
 def floor(angle, texture):
     glPushAttrib(GL_CURRENT_BIT)
     glPushMatrix()
@@ -89,12 +85,11 @@ def floor(angle, texture):
     glPopAttrib()
 
 
-#Funckja wczytująca teksturę z pliku do programu
 def load_texture(file):
     try:
         image = Image.open(file)
-    except Exception as exeption:
-        print(f"Blad podczas otwierania pliku z tekstura: {exeption}")
+    except Exception as exception:
+        print(f"Error: {exception}")
         return None
 
     image_data = image.tobytes("raw", "RGB", 0, -1)
@@ -108,23 +103,21 @@ def load_texture(file):
     return text_id
 
 
-#Funckja wyświetlająca instrukcję obsługi
 def display_popup(message):
     root = tk.Tk()
     root.withdraw()
-    messagebox.showinfo("Instrukacja obslugi", message)
+    messagebox.showinfo("Manual", message)
     root.destroy()
 
 
 def main():
-    print("\n\n!!!ABY WYSWIETLIC INSTRUKCJE OBSLUGI WCISNIJ P PODCZAS DZIALANIA PROGRAMU!!!")
-    level = int(input("Podaj poziom piramidy (liczba od 0 do 6): "))
+    print("\n\n!!!TO DISPLAY MANUAL PRESS P WHILE PROGRAM IS RUNNING!!!")
+    level = int(input("Enter level of pyramid (number from 0 to 6): "))
 
     if level < 0 or level > 6:
-        print("Niepoprawny rozmiar")
+        print("Invalid size")
         return
 
-    #inicjalizacja okna pygame wraz z podstawowymi parametrami
     pygame.init()
     display = (1200, 700)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
@@ -143,7 +136,6 @@ def main():
 
     surface_condition = 0
     angle = 0
-    #Główna pętla w programie nasłuchująca zdarzeń z klawiatury
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -189,14 +181,12 @@ def main():
                 if event.key == pygame.K_p:
                     display_popup(instruction)
 
-        #obrót bryły
         glRotatef(0.5, 0, 1, 0)
         angle += 0.5
         angle = angle % 360
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        #wyłączenie/włączenie tekstury
         if surface_condition == 1:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
             sierpinski((-1, 0, sqrt(3) / 3), (1, 0, sqrt(3) / 3), (0, 0, -sqrt(3) * 2 / 3), (0, sqrt(15) / 3, 0), level, texture_id)
